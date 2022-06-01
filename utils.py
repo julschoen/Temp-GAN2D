@@ -23,7 +23,7 @@ class Attention(nn.Module):
 
       self.gamma = P(torch.zeros(1))
 
-      self.softmax = Softmax(dim=-1)
+      self.softmax = nn.Softmax(dim=-1)
   def forward(self, x):
       m_batchsize, C, height, width = x.size()
       proj_query = self.query_conv(x).view(m_batchsize, -1, width*height).permute(0, 2, 1)
