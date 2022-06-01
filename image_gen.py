@@ -12,8 +12,8 @@ class Generator(nn.Module):
     self.p = params
     self.dim_z = self.p.z_size
 
-    self.arch = {'in_channels' :  [self.p.fiterG * item for item in [16, 16, 8, 4]],
-               'out_channels' : [self.p.fiterG * item for item in [16, 8, 4, 2]],
+    self.arch = {'in_channels' :  [self.p.filterG * item for item in [16, 16, 8, 4]],
+               'out_channels' : [self.p.filterG * item for item in [16, 8, 4, 2]],
                'upsample' : [True] * 4,
                'resolution' : [8, 16, 32, 64],
                'attention' : {2**i: (2**i in [int(item) for item in '32'.split('_')])
