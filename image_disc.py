@@ -46,6 +46,7 @@ class Discriminator(nn.Module):
 
   def forward(self, x):
     # Loop over blocks
+    h = x
     for index, blocklist in enumerate(self.blocks):
       for block in blocklist:
         h = block(h)
