@@ -51,5 +51,5 @@ class Discriminator(nn.Module):
       for block in blocklist:
         h = block(h)
     # Apply global sum pooling as in SN-GAN
-    h = torch.sum(self.activation(h), [2, 3, 4])
+    h = torch.sum(self.activation(h), [2, 3])
     return self.linear(h)
