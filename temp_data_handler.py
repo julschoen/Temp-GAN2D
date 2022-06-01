@@ -7,7 +7,7 @@ import os
 class DATA(Dataset):
   def __init__(self, path): 
     self.files = np.load(path)['x']
-    self.len = len(self.files.shape[0])
+    self.len = self.files.shape[0]
 
   def __getitem__(self, index):
       x = self.files[index]
