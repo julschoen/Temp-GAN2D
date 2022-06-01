@@ -337,8 +337,8 @@ class Trainer(object):
         self.tempD.zero_grad()
         fake, noise, ind = self.sample_g()
         with autocast():
-            real = real.reshape(-1,3,1,real.shape[-3],real.shape[-2])
-            fake = fake.reshape(-1,3,1,fake.shape[-3],fake.shape[-2])
+            real = real.reshape(-1,3,1,real.shape[-2],real.shape[-1])
+            fake = fake.reshape(-1,3,1,fake.shape[-2],fake.shape[-1])
             r1, r2, r3 = real[:,0], real[:,1], real[:,2]
             f1, f2, f3 = fake[:,0], fake[:,1], fake[:,2]
 
@@ -367,7 +367,7 @@ class Trainer(object):
         fake, noise, ind = self.sample_g()
 
         with autocast():
-            fake = fake.reshape(-1,3,1,fake.shape[-3],fake.shape[-2])
+            fake = fake.reshape(-1,3,1,fake.shape[-2],fake.shape[-1])
             f1, f2, f3 = fake[:,0], fake[:,1], fake[:,2]
 
             h1 = self.tempD(f1)
