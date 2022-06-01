@@ -47,6 +47,7 @@ class Discriminator(nn.Module):
 
   def forward(self, x):
     # Run input conv
+    h = x
     for index, blocklist in enumerate(self.blocks):
       for block in blocklist:
         h = block(h)
