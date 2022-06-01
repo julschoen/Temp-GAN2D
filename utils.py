@@ -12,7 +12,7 @@ def snconv3d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, dila
 def snlinear(in_features, out_features):
     return SpectralNorm(nn.Linear(in_features=in_features, out_features=out_features))
 
-class Attention(Module):
+class Attention(nn.Module):
   def __init__(self, in_dim):
       super(Attention, self).__init__()
       self.chanel_in = in_dim
