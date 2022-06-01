@@ -21,7 +21,7 @@ class Attention(nn.Module):
       self.key_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
       self.value_conv = snconv3d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
 
-      self.gamma = Parameter(torch.zeros(1))
+      self.gamma = P(torch.zeros(1))
 
       self.softmax = Softmax(dim=-1)
   def forward(self, x):
