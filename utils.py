@@ -13,34 +13,32 @@ def snlinear(in_features, out_features):
     return SpectralNorm(nn.Linear(in_features=in_features, out_features=out_features))
 
 class Attention(Module):
-""" Position attention module  https://github.com/junfu1115/DANet/blob/master/encoding/nn/attention.py"""
-#Ref from SAGAN
-def __init__(self, in_dim):
-    super(Attention, self).__init__()
-    self.chanel_in = in_dim
+  def __init__(self, in_dim):
+      super(Attention, self).__init__()
+      self.chanel_in = in_dim
 
-    self.query_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
-    self.key_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
-    self.value_conv = snconv3d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
+      self.query_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
+      self.key_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
+      self.value_conv = snconv3d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
 
-    self.gamma = Parameter(torch.zeros(1))
+      self.gamma = Parameter(torch.zeros(1))
 
-    self.softmax = Softmax(dim=-1)
-def forward(self, x):
-    m_batchsize, C, height, width = x.size()
-    proj_query = self.query_conv(x).view(m_batchsize, -1, width*height).permute(0, 2, 1)
-    proj_key = self.key_conv(x).view(m_batchsize, -1, width*height)
-    energy = torch.bmm(proj_query, proj_key)
-    attention = self.softmax(energy)
-    proj_value = self.value_conv(x).view(m_batchsize, -1, width*height)
+      self.softmax = Softmax(dim=-1)
+  def forward(self, x):
+      m_batchsize, C, height, width = x.size()
+      proj_query = self.query_conv(x).view(m_batchsize, -1, width*height).permute(0, 2, 1)
+      proj_key = self.key_conv(x).view(m_batchsize, -1, width*height)
+      energy = torch.bmm(proj_query, proj_key)
+      attention = self.softmax(energy)
+      proj_value = self.value_conv(x).view(m_batchsize, -1, width*height)
 
-    out = torch.bmm(proj_value, attention.permute(0, 2, 1))
-    out = out.view(m_batchsize, C, height, width)
+      out = torch.bmm(proj_value, attention.permute(0, 2, 1))
+      out = out.view(m_batchsize, C, height, width)
 
-    out = self.gamma*out + x
-    #out = F.avg_pool2d(out, out.size()[2:4])
+      out = self.gamma*out + x
+      #out = F.avg_pool2d(out, out.size()[2:4])
 
-    return out
+      return out
 
 class GBlock(nn.Module):
   def __init__(self, in_channels, out_channels, upsample=None, channel_ratio=4):
