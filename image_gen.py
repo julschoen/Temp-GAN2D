@@ -34,7 +34,7 @@ class Generator(nn.Module):
     # Turn self.blocks into a ModuleList so that it's all properly registered.
     self.blocks = nn.ModuleList([nn.ModuleList(block) for block in self.blocks])
 
-    self.output_layer = nn.Sequential(nn.BatchNorm3d(self.arch['out_channels'][-1]),
+    self.output_layer = nn.Sequential(nn.BatchNorm2d(self.arch['out_channels'][-1]),
                                     nn.ReLU(inplace=True),
                                     snconv3d(self.arch['out_channels'][-1], 1))
 
