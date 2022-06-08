@@ -16,7 +16,7 @@ class Generator(nn.Module):
                'out_channels' : [self.p.filterG * item for item in [16, 8, 4, 2]],
                'upsample' : [True] * 4,
                'resolution' : [8, 16, 32, 64],
-               'attention' : {2**i: (2**i in [int(item) for item in '32'.split('_')])
+               'attention' : {2**i: (2**i in [int(item) for item in '16'.split('_')])
                               for i in range(3,7)}}
 
     self.linear = snlinear(self.p.z_size, self.arch['in_channels'][0] * 4*4)
