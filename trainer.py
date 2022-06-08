@@ -211,24 +211,23 @@ class Trainer(object):
         ims = None
         zs = None
         inds = None
-        with autocast():
-            for _ in range(self.p.batch_size):
-                z = torch.randn(1, self.p.z_size, dtype=torch.float, device=self.device)
-                for i in range(torch.randint(low=2, high=11, size=())):
-                    z = torch.concat(
-                        (z, self.tempG(z[-1].unsqueeze(0)).reshape(1,-1))
-                    )
-                ind = torch.from_numpy(np.sort(np.random.choice(z.shape[0], 3, replace=False)))
-                z = z[ind]
-                im = self.imG(z)
-                if ims is None:
-                    ims = im.reshape(1,3,64,64)
-                    zs = z[0].reshape(1,-1)
-                    inds = ind.reshape(1,3)
-                else:
-                    ims = torch.concat((ims,im.reshape(1,3,64,64)))
-                    zs = torch.concat((zs,z[0].reshape(1,-1)))
-                    inds = torch.concat((inds, ind.reshape(1,3)))
+        for _ in range(self.p.batch_size):
+            z = torch.randn(1, self.p.z_size, dtype=torch.float, device=self.device)
+            for i in range(torch.randint(low=2, high=11, size=())):
+                z = torch.concat(
+                    (z, self.tempG(z[-1].unsqueeze(0)).reshape(1,-1))
+                )
+            ind = torch.from_numpy(np.sort(np.random.choice(z.shape[0], 3, replace=False)))
+            z = z[ind]
+            im = self.imG(z)
+            if ims is None:
+                ims = im.reshape(1,3,64,64)
+                zs = z[0].reshape(1,-1)
+                inds = ind.reshape(1,3)
+            else:
+                ims = torch.concat((ims,im.reshape(1,3,64,64)))
+                zs = torch.concat((zs,z[0].reshape(1,-1)))
+                inds = torch.concat((inds, ind.reshape(1,3)))
 
         return ims, zs, inds
 
@@ -257,13 +256,13 @@ class Trainer(object):
         for p in self.tempD.parameters():
             p.requires_grad = True
         self.tempD.zero_grad()
-        with autocast():
-            fake, _, _ = self.sample_g()
-            disc_fake = self.tempD(fake)
-            disc_real = self.tempD(real)
-            errD_real = (nn.ReLU()(1.0 - disc_real)).mean()
-            errD_fake = (nn.ReLU()(1.0 + disc_fake)).mean()
-            errTempD = errD_fake + errD_real
+        
+        fake, _, _ = self.sample_g()
+        disc_fake = self.tempD(fake)
+        disc_real = self.tempD(real)
+        errD_real = (nn.ReLU()(1.0 - disc_real)).mean()
+        errD_fake = (nn.ReLU()(1.0 + disc_fake)).mean()
+        errTempD = errD_fake + errD_real
         self.scalerTempD.scale(errTempD).backward()
         self.scalerTempD.step(self.optimizerTempD)
         self.scalerTempD.update()
@@ -300,9 +299,8 @@ class Trainer(object):
         self.tempG.zero_grad()
         fake, noise, ind = self.sample_g()
 
-        with autocast():
-            disc_temp_fake = self.imD(fake[:,0].unsqueeze(1))
-            errTempG = - disc_temp_fake.mean()
+        disc_temp_fake = self.imD(fake[:,0].unsqueeze(1))
+        errTempG = - disc_temp_fake.mean()
 
         self.scalerTempG.scale(errTempG).backward()
         self.scalerTempG.step(self.optimizerTempG)
@@ -322,10 +320,9 @@ class Trainer(object):
         self.enc.zero_grad()
         self.imG.zero_grad()
 
-        with autocast():
-            zs = self.enc(real.unsqueeze(1))
-            rec = self.imG(zs)
-            loss = self.reg_loss(rec.squeeze(),real.squeeze())
+        zs = self.enc(real.unsqueeze(1))
+        rec = self.imG(zs)
+        loss = self.reg_loss(rec.squeeze(),real.squeeze())
 
         self.scalerEnc.scale(loss).backward()
         self.scalerEnc.step(self.optimizerEnc)
@@ -345,19 +342,19 @@ class Trainer(object):
 
         self.tempD.zero_grad()
         fake, noise, ind = self.sample_g()
-        with autocast():
-            real = real.reshape(-1,3,1,real.shape[-2],real.shape[-1])
-            fake = fake.reshape(-1,3,1,fake.shape[-2],fake.shape[-1])
-            r1, r2, r3 = real[:,0], real[:,1], real[:,2]
-            f1, f2, f3 = fake[:,0], fake[:,1], fake[:,2]
+        
+        real = real.reshape(-1,3,1,real.shape[-2],real.shape[-1])
+        fake = fake.reshape(-1,3,1,fake.shape[-2],fake.shape[-1])
+        r1, r2, r3 = real[:,0], real[:,1], real[:,2]
+        f1, f2, f3 = fake[:,0], fake[:,1], fake[:,2]
 
-            h1 = self.tempD(torch.concat((r1,f1)))
-            h2 = self.tempD(torch.concat((r2,f2)))
-            h3 = self.tempD(torch.concat((r3,f3)))
+        h1 = self.tempD(torch.concat((r1,f1)))
+        h2 = self.tempD(torch.concat((r2,f2)))
+        h3 = self.tempD(torch.concat((r3,f3)))
 
-            l1 = self.triplet_loss(h1,h2,h3)
-            l2 = self.triplet_loss(h3,h2,h1)
-            loss = l1+l2
+        l1 = self.triplet_loss(h1,h2,h3)
+        l2 = self.triplet_loss(h3,h2,h1)
+        loss = l1+l2
 
         self.scalerTempD.scale(loss).backward()
         self.scalerTempD.step(self.optimizerTempD)
@@ -375,17 +372,16 @@ class Trainer(object):
         self.tempG.zero_grad()
         fake, noise, ind = self.sample_g()
 
-        with autocast():
-            fake = fake.reshape(-1,3,1,fake.shape[-2],fake.shape[-1])
-            f1, f2, f3 = fake[:,0], fake[:,1], fake[:,2]
+        fake = fake.reshape(-1,3,1,fake.shape[-2],fake.shape[-1])
+        f1, f2, f3 = fake[:,0], fake[:,1], fake[:,2]
 
-            h1 = self.tempD(f1)
-            h2 = self.tempD(f2)
-            h3 = self.tempD(f3)
+        h1 = self.tempD(f1)
+        h2 = self.tempD(f2)
+        h3 = self.tempD(f3)
 
-            l1 = self.triplet_loss(h1,h2,h3)
-            l2 = self.triplet_loss(h3,h2,h1)
-            loss = l1+l2
+        l1 = self.triplet_loss(h1,h2,h3)
+        l2 = self.triplet_loss(h3,h2,h1)
+        loss = l1+l2
 
         self.scalerTempG.scale(loss).backward()
         self.scalerTempG.step(self.optimizerTempG)
@@ -413,9 +409,9 @@ class Trainer(object):
                 
 
             for _ in range(self.p.temp_iter):
-                errTempD_real, errTempD_fake = 0, 0#self.step_TripletD(real),0#self.step_tempD(real)
-                errTempG = 0#self.step_tempG()
-                err_rec = 0#self.step_TripletG()
+                errTempD_real, errTempD_fake = self.step_TripletD(real),0#self.step_tempD(real)
+                errTempG = self.step_tempG()
+                err_rec = self.step_TripletG()
 
             self.imG_losses.append(errImG)
             self.tempG_losses.append(errTempG)
