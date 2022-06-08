@@ -405,9 +405,9 @@ class Trainer(object):
                 
 
             for _ in range(self.p.temp_iter):
-                errTempD_real, errTempD_fake = self.step_TripletD(real),0#self.step_tempD(real)
-                errTempG = self.step_tempG()
-                err_rec = self.step_TripletG()
+                errTempD_real, errTempD_fake = 0, 0#self.step_TripletD(real),0#self.step_tempD(real)
+                errTempG = 0#self.step_tempG()
+                err_rec = 0#self.step_TripletG()
             self.tracker.epoch_end()
             self.imG_losses.append(errImG)
             self.tempG_losses.append(errTempG)
