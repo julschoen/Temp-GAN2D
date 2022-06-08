@@ -282,7 +282,7 @@ class Trainer(object):
         for p in self.imG.parameters():
             p.requires_grad = False
 
-        return errImG.item(), fake
+        return errImG.item(), fake.detach()
 
     def step_tempG(self):
         for p in self.tempG.parameters():
@@ -401,7 +401,6 @@ class Trainer(object):
                     real = data.to(self.device)
                     errImD_real, errImD_fake = self.step_imD(real[:,0])
                 errImG, fake = self.step_imG()
-                print(real.max(), real.min(), fake.max(), fake.min())
                 #err_rec = #self.step_Enc(real[:,0])
                 
 
