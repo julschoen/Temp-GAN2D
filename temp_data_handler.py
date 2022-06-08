@@ -13,7 +13,8 @@ class DATA(Dataset):
       x = self.files[index]
       ind = np.sort(np.random.choice(x.shape[0], 3, replace=False))
       xs = x[ind]
-      xs = np.clip(xs, -1,1)
+      xs = ((xs)/255)*2-1
+      xs = np.clip(xs, -1, 1)
       return torch.from_numpy(xs).float().squeeze(), torch.Tensor(ind)
 
   def __len__(self):
