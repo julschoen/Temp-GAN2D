@@ -2,7 +2,6 @@ import os
 import numpy as np
 import pytorch_fid_wrapper as FID
 import pickle
-from carbontracker.tracker import CarbonTracker
 
 import torch 
 import torch.optim as optim
@@ -94,7 +93,6 @@ class Trainer(object):
 
         self.reg_loss = nn.MSELoss()
         self.triplet_loss = nn.TripletMarginLoss(margin=0.5)
-        self.tracker = CarbonTracker(epochs=self.p.niters, log_dir=self.p.log_dir)
 
     def inf_train_gen(self):
         while True:
@@ -239,14 +237,13 @@ class Trainer(object):
             p.requires_grad = True
         
         self.imD.zero_grad()
-        with autocast():
-            z = torch.randn(real.shape[0], self.p.z_size, dtype=torch.float, device=self.device)
-            fake = self.imG(z)
-            disc_fake = self.imD(fake)
-            disc_real = self.imD(real.unsqueeze(1))
-            errD_real = (nn.ReLU()(1.0 - disc_real)).mean()
-            errD_fake = (nn.ReLU()(1.0 + disc_fake)).mean()
-            errImD = errD_fake + errD_real
+        z = torch.randn(real.shape[0], self.p.z_size, dtype=torch.float, device=self.device)
+        fake = self.imG(z)
+        disc_fake = self.imD(fake)
+        disc_real = self.imD(real.unsqueeze(1))
+        errD_real = (nn.ReLU()(1.0 - disc_real)).mean()
+        errD_fake = (nn.ReLU()(1.0 + disc_fake)).mean()
+        errImD = errD_fake + errD_real
         self.scalerImD.scale(errImD).backward()
         self.scalerImD.step(self.optimizerImD)
         self.scalerImD.update()
@@ -281,11 +278,11 @@ class Trainer(object):
             p.requires_grad = True
 
         self.imG.zero_grad()
-        with autocast():
-            z = torch.randn(self.p.batch_size, self.p.z_size, dtype=torch.float, device=self.device)
-            fake = self.imG(z)
-            disc_fake = self.imD(fake)
-            errImG = - disc_fake.mean()
+        
+        z = torch.randn(self.p.batch_size, self.p.z_size, dtype=torch.float, device=self.device)
+        fake = self.imG(z)
+        disc_fake = self.imD(fake)
+        errImG = - disc_fake.mean()
 
         self.scalerImG.scale(errImG).backward()
         self.scalerImG.step(self.optimizerImG)
@@ -406,7 +403,6 @@ class Trainer(object):
 
         print("Starting Training...")
         for i in range(step_done, self.p.niters):
-            self.tracker.epoch_start()
             for _ in range(self.p.im_iter): 
                 for _ in range(self.p.iterD): 
                     data, _ = next(gen)
@@ -420,7 +416,7 @@ class Trainer(object):
                 errTempD_real, errTempD_fake = 0, 0#self.step_TripletD(real),0#self.step_tempD(real)
                 errTempG = 0#self.step_tempG()
                 err_rec = 0#self.step_TripletG()
-            self.tracker.epoch_end()
+
             self.imG_losses.append(errImG)
             self.tempG_losses.append(errTempG)
             self.imD_losses.append((errImD_real, errImD_fake))
@@ -435,6 +431,6 @@ class Trainer(object):
             
         
         self.log_final(i, fake, real)
-        self.tracker.stop()
+
         print('...Done')
 
