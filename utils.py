@@ -17,9 +17,9 @@ class Attention(nn.Module):
       super(Attention, self).__init__()
       self.chanel_in = in_dim
 
-      self.query_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
-      self.key_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1)
-      self.value_conv = snconv3d(in_channels=in_dim, out_channels=in_dim, kernel_size=1)
+      self.query_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1, padding=0, bias=False)
+      self.key_conv = snconv3d(in_channels=in_dim, out_channels=in_dim//8, kernel_size=1, padding=0, bias=False)
+      self.value_conv = snconv3d(in_channels=in_dim, out_channels=in_dim, kernel_size=1, padding=0, bias=False)
 
       self.gamma = P(torch.zeros(1))
 
