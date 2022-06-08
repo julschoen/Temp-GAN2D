@@ -401,7 +401,7 @@ class Trainer(object):
                     real = data.to(self.device)
                     errImD_real, errImD_fake = self.step_imD(real[:,0])
                 errImG, fake = self.step_imG()
-                
+                print(real.max(), real.min(), fake.max(), fake.min())
                 #err_rec = #self.step_Enc(real[:,0])
                 
 
