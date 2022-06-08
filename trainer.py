@@ -48,6 +48,10 @@ class Trainer(object):
         self.tempD = TempD(self.p).to(self.device)
         self.imG = ImG(self.p).to(self.device)
         self.tempG = TempG(self.p).to(self.device)
+
+        self.imG.apply(self.weights_init)
+        self.imD.apply(self.weights_init)
+
         #self.enc = Encoder(self.p).to(self.device)
         if self.p.ngpu>1:
             self.imD = nn.DataParallel(self.imD)
@@ -97,6 +101,14 @@ class Trainer(object):
             for data in self.generator_train:
                 yield data
         
+    def weights_init(self, m):
+        classname = m.__class__.__name__
+        if classname.find('Conv') != -1:
+            nn.init.normal_(m.weight.data, 0.0, 0.02)
+        elif classname.find('BatchNorm') != -1:
+            nn.init.normal_(m.weight.data, 1.0, 0.02)
+            nn.init.constant_(m.bias.data, 0)
+
     def log_train(self, step, fake, real):
         with torch.no_grad():
             self.fid.append(
