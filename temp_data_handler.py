@@ -18,4 +18,3 @@ class DATA(Dataset):
 
   def __len__(self):
       return self.len
-

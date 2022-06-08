@@ -11,14 +11,15 @@ class Discriminator(nn.Module):
     super(Discriminator, self).__init__()
     self.p = params
     # Architecture
-    self.arch = {'in_channels' :  [1] + [self.p.filterD*item for item in [1, 2, 4, 8]],
-               'out_channels' : [item * self.p.filterD for item in [1, 2, 4, 8, 16]],
+    self.arch = {'in_channels' :  [self.p.filterD*item for item in [1, 2, 4, 8]],
+               'out_channels' : [item * self.p.filterD for item in [2, 4, 8, 16]],
                'downsample' : [True] * 4 + [False],
                'resolution' : [32, 16, 8, 4, 4],
                'attention' : {2**i: 2**i in [int(item) for item in '16'.split('_')]
                               for i in range(2,7)}}
     
     # Prepare model
+    self.input_conv = snconv3d(1, self.arch['in_channels'][0])
     self.blocks = []
     for index in range(len(self.arch['out_channels'])):
       self.blocks += [[DBlock(in_channels=self.arch['in_channels'][index] if d_index==0 else self.arch['out_channels'][index],
@@ -47,7 +48,7 @@ class Discriminator(nn.Module):
 
   def forward(self, x):
     # Run input conv
-    h = x
+    h = self.input_conv(x)
     for index, blocklist in enumerate(self.blocks):
       for block in blocklist:
         h = block(h)
