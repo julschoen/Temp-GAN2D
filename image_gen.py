@@ -30,5 +30,5 @@ class Generator(nn.Module):
         )
 
     def forward(self, input):
-        return self.main(input)
+      return self.main(input.reshape(-1,self.dim_z, 1, 1))
 
