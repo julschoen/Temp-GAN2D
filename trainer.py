@@ -395,10 +395,11 @@ class Trainer(object):
         print("Starting Training...")
         for i in range(step_done, self.p.niters):
             self.tracker.epoch_start()
-            for _ in range(self.p.im_iter):  
-                data, _ = next(gen)
-                real = data.to(self.device)
-                errImD_real, errImD_fake = self.step_imD(real[:,0])
+            for _ in range(self.p.im_iter): 
+                for _ in range(self.p.iterD): 
+                    data, _ = next(gen)
+                    real = data.to(self.device)
+                    errImD_real, errImD_fake = self.step_imD(real[:,0])
                 errImG, fake = self.step_imG()
                 
                 #err_rec = #self.step_Enc(real[:,0])
