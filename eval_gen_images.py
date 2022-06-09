@@ -8,6 +8,9 @@ import torch.nn as nn
 from torch.cuda.amp import autocast
 from torch.autograd import Variable
 
+import torchvision
+import torchvision.utils as vutils
+
 from image_gen import Generator as ImG
 from temp_gen import Generator as TempG
 from image_disc import Discriminator as ImD
