@@ -6,6 +6,9 @@ import torch.nn as nn
 from torch.cuda.amp import autocast
 import torch
 
+import torchvision
+import torchvision.utils as vutils
+
 from image_gen import Generator as ImG
 from temp_gen import Generator as TempG
 
@@ -48,9 +51,9 @@ def eval(params):
 					print(z.mean(), z.std())
 					im = imG(z)
 					if ims is None:
-						ims = im.reshape(1,params.time,-1,128,128)
+						ims = im.reshape(1,params.time,64,64)
 					else:
-						ims = torch.concat((ims,im.reshape(1,params.time,-1,128,128)))
+						ims = torch.concat((ims,im.reshape(1,params.time,64,64)))
 		
 		np.savez_compressed(os.path.join(params.log_dir,f'{model_path}_temp.npz'),x=ims.detach().cpu().numpy())
 
