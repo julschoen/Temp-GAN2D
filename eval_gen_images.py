@@ -44,7 +44,6 @@ def generate_ims(netG, params, save_name, noise=None):
 	with torch.no_grad():
 		with autocast():
 			ims = netG(noise)
-	ims = ims.detach().cpu().numpy()
 	torchvision.utils.save_image(
             vutils.make_grid(torch.reshape(ims, (-1,1,64,64)), padding=2, normalize=True)
             , os.path.join(params.log_dir, save_name))
@@ -95,7 +94,9 @@ def eval(params):
 			rev_zs = reverse_z(imG, data, params)
 			#generate_ims(imG, params, f'rec_gen_{model_path}.npz', noise=zs)
 			generate_ims(imG, params, f'rev_rec_gen_{model_path}.png', noise=rev_zs)
-			np.savez_compressed(os.path.join(params.log_dir, f'rec_real_{model_path}.npz'), x=data.detach().cpu().numpy())
+			torchvision.utils.save_image(
+	            vutils.make_grid(torch.reshape(data, (-1,1,64,64)), padding=2, normalize=True)
+	            , os.path.join(params.log_dir, f'rec_real_{model_path}.png'))
 			break
 
 def main():
