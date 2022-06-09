@@ -47,7 +47,6 @@ def eval(params):
 						z = torch.concat(
 							(z, tempG(z[-1].unsqueeze(0)).reshape(1,-1))
 						)
-					print(z[0])
 					print(z.mean(), z.std())
 					im = imG(z)
 					if ims is None:
