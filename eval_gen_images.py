@@ -42,7 +42,9 @@ def generate_ims(netG, params, save_name, noise=None):
 		with autocast():
 			ims = netG(noise)
 	ims = ims.detach().cpu().numpy()
-	np.savez_compressed(os.path.join(params.log_dir, save_name), x=ims)
+	torchvision.utils.save_image(
+            vutils.make_grid(torch.reshape(ims, (-1,1,64,64)), padding=2, normalize=True)
+            , os.path.join(params.log_dir, save_name))
 
 def get_embedding(ims, imD):
 	with torch.no_grad():
@@ -83,20 +85,20 @@ def eval(params):
 	for model_path in params.model_log:
 		print(model_path)
 		imG, tempG, imD = load_models(model_path, params.ngpu)
-		generate_ims(imG, params, f'random_gen_{model_path}.npz')
+		generate_ims(imG, params, f'random_gen_{model_path}.png')
 		for _, (data, _) in enumerate(generator):
 			data = data[:,0].to(params.device)
-			zs = get_embedding(data, imD)
+			#zs = get_embedding(data, imD)
 			rev_zs = reverse_z(imG, data, params)
-			generate_ims(imG, params, f'rec_gen_{model_path}.npz', noise=zs)
-			generate_ims(imG, params, f'rev_rec_gen_{model_path}.npz', noise=rev_zs)
+			#generate_ims(imG, params, f'rec_gen_{model_path}.npz', noise=zs)
+			generate_ims(imG, params, f'rev_rec_gen_{model_path}.png', noise=rev_zs)
 			np.savez_compressed(os.path.join(params.log_dir, f'rec_real_{model_path}.npz'), x=data.detach().cpu().numpy())
 			break
 
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--batch_size', type=int, default=16, help='Batch size')
-	parser.add_argument('--data_path', type=str, default='data/test_pat.npz',help='Path to data.')
+	parser.add_argument('--data_path', type=str, default='mov_mnist.npz',help='Path to data.')
 	parser.add_argument('--ngpu', type=int, default=2, help='Number of GPUs')
 	parser.add_argument('--log_dir', type=str, default='log', help='Save Location')
 	parser.add_argument('--device', type=str, default='cuda', help='Torch Device Choice')
